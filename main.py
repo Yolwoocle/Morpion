@@ -92,24 +92,8 @@ class Jeu:
             print("La partie est terminée ! Le vainqueur est", self.joueurPlaying().nom)
         else:
             print("Egalité!")
-"""
-import pygame
 
-surf = pygame.display.set_mode((600,600)) # création de la surface de jeu
-run = True # permet de faire tourner le jeu en continu
 
-grille = pygame.image.load("grille.png") # on importe les images du jeu
-croix = pygame.image.load("croix.png")
-rond = pygame.image.load("rond.png")
-
-while run : # permet de faire tourner le jeu en continu
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            run = False
-    surf.fill((255,255,255)) # rends la surface (le fond) blanc
-    surf.blit(grille,(50,50)) # affiche la grille
-pygame.quit() # ferme correctement la page python . sans ça, on risque de ne pas pouvoir fermer la page
-"""
 L = [Joueur("Zarcoks","X"), Joueur('Olivia', "O")]
 game = Jeu(L)
 game.jeuEntier()

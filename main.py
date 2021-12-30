@@ -94,6 +94,10 @@ class Jeu:
             print("Egalité!")
 
 
-L = [Joueur("Zarcoks","X"), Joueur('Olivia', "O")]
+
+player1_name = input("Entrez le pseudo du joueur 1 de symbole X : ")
+player2_name = input("Entrez le pseudo du joueur 2 de symbole O : ")
+L = [Joueur(player1_name,"X"), Joueur(player2_name, "O")]
+
 game = Jeu(L)
 game.jeuEntier()

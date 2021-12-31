@@ -109,13 +109,22 @@ class Jeu:
             self.grille.__str__()
 
         elif niveau_IA == 2:
-            # On cree un tableau de combinaisons gagnantes
-            comb_gagnantes = [[0, 1, 2], [3, 4, 5], [6, 7, 8],[0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]]
             while not(self.grille.partieGagnee()) and (len(self.grille.caseDispo) != 0): # Boucle du jeu
                 if self.joueurPlaying() == self.list_Joueur[0]: # Si le joueur actuel est le player
                     self.tourJeu(None)
+
                 else:
-                    print("Programme non-termine")
+                    have_played = False
+                    for i in range(9):
+                        if self.grille.tableau[i].valeur == "O":
+                            for j in self.grille.caseDispo:
+                                if self.grille.tableau[i+i-j] == "O" or self.grille.tableau[i+i-j] == None: # designe l'emplacement de la case completant la combinaison gagnante
+                                    self.tourJeu(i+i-j)
+                                    have_played = True
+                    if have_played == False:
+                        self.tourJeu(str(self.grille.caseDispo[random.randint(0, len(self.grille.caseDispo) - 1)])) # Position random
+
+
         self.grille.__str__()
 
 multijoueur = input("Souhaitez-vous une partie multijoueur ? (O/N) : ")
@@ -127,9 +136,9 @@ if multijoueur == "O":
     player2_name = input("Entrez le pseudo du joueur 2 de symbole O : ")
     niveau_IA = 0
 else:
-    niveau_IA = input("Choisissez le niveau de l'IA (1) : ")
-    while not(niveau_IA == "1"): # Securite
-        niveau_IA = input("Erreur, recommencez (1) : ")
+    niveau_IA = input("Choisissez le niveau de l'IA (1 / 2) : ")
+    while not(niveau_IA == "1" or niveau_IA == "2"): # Securite
+        niveau_IA = input("Erreur, recommencez (1 / 2) : ")
     niveau_IA = int(niveau_IA) # Evite les erreurs entre str et int
     player1_name = input("Entrez votre pseudo : ")
     player2_name = "IA " + str(niveau_IA)

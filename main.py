@@ -77,9 +77,12 @@ class Jeu:
             if str(valeurs) == position:
                 return True
         return False
-    def tourJeu(self):
+    def tourJeu(self, setPos):
         self.grille.__str__()
-        pos = input(self.joueurPlaying().nom + ", Position: ")
+        if setPos == None:
+            pos = input(self.joueurPlaying().nom + ", Position: ")
+        else:
+            pos = setPos # Fonctionnement assure car setPos est issu d'un randint
         while not(self.isEmpty(pos,self.grille)): # securite
             pos = input("Erreur, recommencez: ")
         self.grille.tableau[int(pos)].valeur = self.list_Joueur[self.rang_joueur].symbole # Assigne le symbole du joueur a la case du tableau au rang pos
@@ -96,6 +99,17 @@ class Jeu:
                 print("La partie est terminée ! Le vainqueur est", self.joueurPlaying().nom)
             else:
                 print("Egalité!")
+
+        elif niveau_IA == 1:
+            while not(self.grille.partieGagnee()) and (len(self.grille.caseDispo) != 0): # Boucle du jeu
+                if self.joueurPlaying() == self.list_Joueur[0]: # Si le joueur actuel est le player
+                    self.tourJeu(None)
+                else:
+                    print(self.grille.caseDispo)
+                    print(len(self.grille.caseDispo)-1)
+                    self.tourJeu(self.grille.caseDispo[random.randint(0, len(self.grille.caseDispo)-1)]) # prend un rang aleatoire correspondant a une case vide
+
+            self.grille.__str__()
 
 multijoueur = input("Souhaitez-vous une partie multijoueur ? (O/N) : ")
 while not(multijoueur == "O" or multijoueur == "N"):

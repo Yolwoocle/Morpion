@@ -92,7 +92,7 @@ class Jeu:
     def jeuEntier(self, niveau_IA):
         if niveau_IA == 0:
             while not(self.grille.partieGagnee()) and (len(self.grille.caseDispo) != 0): # Boucle du jeu
-                self.tourJeu()
+                self.tourJeu(None)
             self.grille.__str__()
             if self.grille.partieGagnee():
                 self.changePlayer()
@@ -105,11 +105,18 @@ class Jeu:
                 if self.joueurPlaying() == self.list_Joueur[0]: # Si le joueur actuel est le player
                     self.tourJeu(None)
                 else:
-                    print(self.grille.caseDispo)
-                    print(len(self.grille.caseDispo)-1)
-                    self.tourJeu(self.grille.caseDispo[random.randint(0, len(self.grille.caseDispo)-1)]) # prend un rang aleatoire correspondant a une case vide
-
+                    self.tourJeu(str(self.grille.caseDispo[random.randint(0, len(self.grille.caseDispo)-1)])) # prend un rang aleatoire correspondant a une case vide
             self.grille.__str__()
+
+        elif niveau_IA == 2:
+            # On cree un tableau de combinaisons gagnantes
+            comb_gagnantes = [[0, 1, 2], [3, 4, 5], [6, 7, 8],[0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]]
+            while not(self.grille.partieGagnee()) and (len(self.grille.caseDispo) != 0): # Boucle du jeu
+                if self.joueurPlaying() == self.list_Joueur[0]: # Si le joueur actuel est le player
+                    self.tourJeu(None)
+                else:
+                    print("Programme non-termine")
+        self.grille.__str__()
 
 multijoueur = input("Souhaitez-vous une partie multijoueur ? (O/N) : ")
 while not(multijoueur == "O" or multijoueur == "N"):

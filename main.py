@@ -83,6 +83,7 @@ class Jeu:
             pos = input(self.joueurPlaying().nom + ", Position: ")
         else:
             pos = setPos # Fonctionnement assure car setPos est issu d'un randint
+            print("L'IA joue : " + str(pos))
         while not(self.isEmpty(pos,self.grille)): # securite
             pos = input("Erreur, recommencez: ")
         self.grille.tableau[int(pos)].valeur = self.list_Joueur[self.rang_joueur].symbole # Assigne le symbole du joueur a la case du tableau au rang pos
@@ -107,41 +108,58 @@ class Jeu:
                 else:
                     self.tourJeu(str(self.grille.caseDispo[random.randint(0, len(self.grille.caseDispo)-1)])) # prend un rang aleatoire correspondant a une case vide
             self.grille.__str__()
+            if self.grille.partieGagnee():
+                self.changePlayer()
+                print("La partie est terminée ! Le vainqueur est", self.joueurPlaying().nom)
+            else:
+                print("Egalité!")
 
         elif niveau_IA == 2:
+            pos_gagnantes = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]]
             while not(self.grille.partieGagnee()) and (len(self.grille.caseDispo) != 0): # Boucle du jeu
                 if self.joueurPlaying() == self.list_Joueur[0]: # Si le joueur actuel est le player
                     self.tourJeu(None)
 
                 else:
-                    pos_gagnantes = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6],[1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]]
                     numbers_X = []
                     have_played = False
+                    for k in range(9):
+                        if self.grille.tableau[k].valeur == "X":  # Trouve l'emplacement des X pour mettre a jour pos_gagnantes sans les X
+                            numbers_X.append(k)
+                    for tab in pos_gagnantes:
+                        for bad_number in numbers_X:
+                            if bad_number in tab:
+                                pos_gagnantes.remove(tab)
                     for i in range(9):
-                        for k in range(9):
-                            if self.grille.tableau[k].valeur == "X": # Trouve l'emplacement des X pour mettre a jour pos_gagnantes sans les X
-                                numbers_X.append(k)
-                        for tab in pos_gagnantes:
-                            for bad_number in numbers_X:
-                                if bad_number in tab:
-                                    pos_gagnantes.pop(tab) # Enleve toutes les pos gagnantes ou se trouve un X
                         if self.grille.tableau[i].valeur == "O": # Si on trouve un symbole O dans la grille
                             for j in range(i+1, 9):
                                 if self.grille.tableau[j].valeur == "O": # On regarde si d'autres symboles O sont dans la grille
                                     for ltl_tab in pos_gagnantes:
                                         if i in ltl_tab and j in ltl_tab: # Si les deux symboles peuvent former une comb gagnante
-                                            ltl_tab.pop(i)
-                                            ltl_tab.pop(j)
-                                            pos = ltl_tab.pop()
+                                            for p in ltl_tab:
+                                                if p != i and p != j:
+                                                    pos = p
+                                                    have_played = True
 
                             if have_played != True:
                                 for ltl_tab in pos_gagnantes:
                                     if i in ltl_tab:
-                                        ltl_tab.pop()
-                                        pos = ltl_tab[random.randint(0, 2)]
-                    self.tourJeu(pos)
+                                        for p in ltl_tab:
+                                            if p != i:
+                                                pos = p
+                                        have_played = True
 
-        self.grille.__str__()
+                    if have_played != True:
+                        pos = self.grille.caseDispo[random.randint(0, len(self.grille.caseDispo)-1)]
+
+                    self.tourJeu(str(pos))
+
+            self.grille.__str__()
+            if self.grille.partieGagnee():
+                self.changePlayer()
+                print("La partie est terminée ! Le vainqueur est", self.joueurPlaying().nom)
+            else:
+                print("Egalité!")
 
 multijoueur = input("Souhaitez-vous une partie multijoueur ? (O/N) : ")
 while not(multijoueur == "O" or multijoueur == "N"):
@@ -152,12 +170,15 @@ if multijoueur == "O":
     player2_name = input("Entrez le pseudo du joueur 2 de symbole O : ")
     niveau_IA = 0
 else:
+    print("--> IA de niveau 1 : Pose son symbole de façon aléatoire.")
+    print("--> IA de niveau 2 : Cherche à tout prix à faire une combinaison gagnante.")
+    print("--> IA de niveau 3 : IA impossible à vaincre...")
     niveau_IA = input("Choisissez le niveau de l'IA (1 / 2) : ")
     while not(niveau_IA == "1" or niveau_IA == "2"): # Securite
         niveau_IA = input("Erreur, recommencez (1 / 2) : ")
     niveau_IA = int(niveau_IA) # Evite les erreurs entre str et int
     player1_name = input("Entrez votre pseudo : ")
-    player2_name = "IA " + str(niveau_IA)
+    player2_name = "IA-" + str(niveau_IA)
 
 
 

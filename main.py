@@ -114,16 +114,32 @@ class Jeu:
                     self.tourJeu(None)
 
                 else:
+                    pos_gagnantes = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6],[1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]]
+                    numbers_X = []
                     have_played = False
                     for i in range(9):
-                        if self.grille.tableau[i].valeur == "O":
-                            for j in self.grille.caseDispo:
-                                if self.grille.tableau[i+i-j] == "O" or self.grille.tableau[i+i-j] == None: # designe l'emplacement de la case completant la combinaison gagnante
-                                    self.tourJeu(i+i-j)
-                                    have_played = True
-                    if have_played == False:
-                        self.tourJeu(str(self.grille.caseDispo[random.randint(0, len(self.grille.caseDispo) - 1)])) # Position random
+                        for k in range(9):
+                            if self.grille.tableau[k].valeur == "X": # Trouve l'emplacement des X pour mettre a jour pos_gagnantes sans les X
+                                numbers_X.append(k)
+                        for tab in pos_gagnantes:
+                            for bad_number in numbers_X:
+                                if bad_number in tab:
+                                    pos_gagnantes.pop(tab) # Enleve toutes les pos gagnantes ou se trouve un X
+                        if self.grille.tableau[i].valeur == "O": # Si on trouve un symbole O dans la grille
+                            for j in range(i+1, 9):
+                                if self.grille.tableau[j].valeur == "O": # On regarde si d'autres symboles O sont dans la grille
+                                    for ltl_tab in pos_gagnantes:
+                                        if i in ltl_tab and j in ltl_tab: # Si les deux symboles peuvent former une comb gagnante
+                                            ltl_tab.pop(i)
+                                            ltl_tab.pop(j)
+                                            pos = ltl_tab.pop()
 
+                            if have_played != True:
+                                for ltl_tab in pos_gagnantes:
+                                    if i in ltl_tab:
+                                        ltl_tab.pop()
+                                        pos = ltl_tab[random.randint(0, 2)]
+                    self.tourJeu(pos)
 
         self.grille.__str__()
 

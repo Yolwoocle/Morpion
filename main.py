@@ -89,7 +89,8 @@ class Jeu:
         self.grille.__str__()
         if self.grille.partieGagnee():
             self.changePlayer()
-            print("La partie est terminée ! Le vainqueur est", self.joueurPlaying().nom)
+            player = str(self.joueurPlaying().nom)
+            print("La partie est terminée ! Le vainqueur est ", player, " !")
         else:
             print("Egalité!")
 
@@ -98,6 +99,11 @@ class Jeu:
 player1_name = input("Entrez le pseudo du joueur 1 de symbole X : ")
 player2_name = input("Entrez le pseudo du joueur 2 de symbole O : ")
 L = [Joueur(player1_name,"X"), Joueur(player2_name, "O")]
-
-game = Jeu(L)
-game.jeuEntier()
+retry = "O"
+while retry == "O":
+    game = Jeu(L)
+    game.jeuEntier()
+    retry = input("Voulez-vous recommencer ? (O/N) :")
+    while not(retry != "O" or retry != "N"):
+        retry = input("Erreur, recommencez (O/N) : ")
+print("\n Merci d'avoir joué !")

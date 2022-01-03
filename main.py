@@ -179,26 +179,12 @@ else:
     niveau_IA = int(niveau_IA) # Evite les erreurs entre str et int
     player1_name = input("Entrez votre pseudo : ")
     player2_name = "IA-" + str(niveau_IA)
-    def jeuEntier(self):
-        while not(self.grille.partieGagnee()) and (len(self.grille.caseDispo) != 0): # Boucle du jeu
-            self.tourJeu()
-        self.grille.__str__()
-        if self.grille.partieGagnee():
-            self.changePlayer()
-            player = str(self.joueurPlaying().nom)
-            print("La partie est terminée ! Le vainqueur est ", player, " !")
-        else:
-            print("Egalité!")
 
-
-
-player1_name = input("Entrez le pseudo du joueur 1 de symbole X : ")
-player2_name = input("Entrez le pseudo du joueur 2 de symbole O : ")
-L = [Joueur(player1_name,"X"), Joueur(player2_name, "O")]
 retry = "O"
+L = [Joueur(player1_name,"X"), Joueur(player2_name, "O")]
 while retry == "O":
     game = Jeu(L)
-    game.jeuEntier()
+    game.jeuEntier(niveau_IA)
     retry = input("Voulez-vous recommencer ? (O/N) :")
     while not(retry != "O" or retry != "N"):
         retry = input("Erreur, recommencez (O/N) : ")

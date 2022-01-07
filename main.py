@@ -70,17 +70,22 @@ class Jeu:
         self.fake_pos_gagantes =  [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]]  # fake_pos_gagantes est une variable identique a pos_gagnantes, mais pour les X
     def update_pos_gagnantes(self, pos_gagnantes):
         numbers_X = []
+        inter_tab = []
         for k in range(9):
-            if self.grille.tableau[k].valeur == "X":  # Trouve l'emplacement des X pour mettre a jour pos_gagnantes sans les X
+            if self.grille.tableau[k].valeur == "X":  # Trouve l'emplacement des O pour mettre a jour fake pos_gagnantes sans les O
                 numbers_X.append(k)
-        for tab in pos_gagnantes:
-            for bad_number in numbers_X:
-                if bad_number in tab:
-                    print("On tente de remove tab de pos gagnantes, tab =", str(tab), "pos gagnantes =", str(pos_gagnantes))
-                    pos_gagnantes.remove(tab)
+        if len(pos_gagnantes) > 0:  # [2, 3, 8]
+            for tab in pos_gagnantes:
+                for i in tab:
+                    for bad_number in numbers_X:
+                        if bad_number == i:
+                            inter_tab.append(tab)
+        for i in inter_tab:
+            pos_gagnantes.remove(i)
         return pos_gagnantes
 
     def ifWinwin(self, grille, pos_gagnantes):
+        print("Ifwinwin, pos gagantes =", pos_gagnantes)
         pos = None
         for comb in pos_gagnantes:  # Pour toutes les combinaisons
             compteur = 0
@@ -131,6 +136,9 @@ class Jeu:
             fake_pos_gagnantes.remove(i)
         return fake_pos_gagnantes
     def IA2(self):
+        if self.compteur == 1 and self.grille.tableau[4].valeur == None:
+            self.tourJeu(str(4))
+            return None
         have_played = False
         self.pos_gagnantes = self.update_pos_gagnantes(self.pos_gagnantes)  # met donc a jour pos_gagnantes
         for i in range(9):
@@ -245,7 +253,6 @@ class Jeu:
                         """
                         else:
                             self.IA2()
-            self.grille.__str__()
             if self.grille.partieGagnee():
                 self.changePlayer()
                 print("La partie est terminée ! Le vainqueur est", self.joueurPlaying().nom)

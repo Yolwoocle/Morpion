@@ -74,18 +74,18 @@ class Jeu:
         for k in range(9):
             if self.grille.tableau[k].valeur == "X":  # Trouve l'emplacement des O pour mettre a jour fake pos_gagnantes sans les O
                 numbers_X.append(k)
-        if len(pos_gagnantes) > 0:  # [2, 3, 8]
+        if len(pos_gagnantes) > 0:
             for tab in pos_gagnantes:
                 for i in tab:
                     for bad_number in numbers_X:
                         if bad_number == i:
                             inter_tab.append(tab)
         for i in inter_tab:
-            pos_gagnantes.remove(i)
+            if i in pos_gagnantes:
+                pos_gagnantes.remove(i)
         return pos_gagnantes
 
     def ifWinwin(self, grille, pos_gagnantes):
-        print("Ifwinwin, pos gagantes =", pos_gagnantes)
         pos = None
         for comb in pos_gagnantes:  # Pour toutes les combinaisons
             compteur = 0
@@ -101,22 +101,25 @@ class Jeu:
         return pos
 
     def strat_adv(self, fake_pos_gagnantes):
-        pos_gagnantes_inter = fake_pos_gagnantes
-        fake_Grille = copy.deepcopy(self.grille)
-        for j in fake_pos_gagnantes:
+        pos_gagnantes_inter = copy.deepcopy(fake_pos_gagnantes)
+        for j in pos_gagnantes_inter:
+            fake_Grille = copy.deepcopy(self.grille)
             for i in j:
+                pos_gagnantes_inter = copy.deepcopy(fake_pos_gagnantes)
                 if i in fake_Grille.caseDispo: # Si la case est libre
                     fake_Grille.tableau[i].valeur = "X" # On simule une grille pour regarder le tour suivant
+                    fake_Grille.caseDispo.remove(i)
                     compteur = 0
-                    pos = self.ifWinwon(self.grille, pos_gagnantes_inter)
+                    pos_gagnantes_inter = self.update_fake_pos_gagnantes(fake_Grille, pos_gagnantes_inter)
+                    fake_Grille.__str__()
+                    pos = self.ifWinwin(fake_Grille, pos_gagnantes_inter)
                     if pos != None:
+                        pos_gagnantes_inter.remove(j)
                         compteur += 1 # On compte le nombre de fois que l'adversaire peut gagner
-                        pos_gagnantes_inter.remove(pos)
-                        pos = self.ifWinwon(self.grille, pos_gagnantes_inter)
+                        pos = self.ifWinwin(fake_Grille, pos_gagnantes_inter)
                         if pos != None:
-                            compteur += 1
-                    if compteur == 2: # Si l'adversaire peut gagner deux fois au prochain tour
-                        return i # On return la position de l'endroit ou il peut poser son symbole pour faire sa stratégie
+                            print("Strategie adverse detectee !")
+                            return i # On return la position de l'endroit ou il peut poser son symbole pour faire sa stratégie
         return None # Sinon on return rien, car pas de stratégie
 
 
@@ -232,27 +235,43 @@ class Jeu:
                 print("Egalité!")
 
         elif niveau_IA == 3:
+            self.compteur = 0
             while not(self.grille.partieGagnee()) and (len(self.grille.caseDispo) != 0): # Boucle du jeu
                 if self.joueurPlaying() == self.list_Joueur[0]: # Si le joueur actuel est le player
                     self.tourJeu(None)
                 else:
                     self.pos_gagnantes = self.update_pos_gagnantes(self.pos_gagnantes)
                     if self.ifWinwin(self.grille, self.pos_gagnantes) != None: # Gagne si c'est possible
+                        print("J'ai gagne !")
                         self.tourJeu(str(self.ifWinwin(self.grille, self.pos_gagnantes)))
                     else:
                         self.fake_pos_gagantes = self.update_fake_pos_gagnantes(self.grille, self.fake_pos_gagantes)
                         if self.ifWinwin(self.grille, self.fake_pos_gagantes) != None: # Empeche l'adversaire de gagner
+                            print("Je pare l'adversaire !")
                             self.tourJeu(str(self.ifWinwin(self.grille, self.fake_pos_gagantes)))
-                            """"
                         else:
-                            fake_pos_gagantes = self.update_fake_pos_gagnantes(self.grille, fake_pos_gagantes)
+                            fake_pos_gagantes = self.update_fake_pos_gagnantes(self.grille, self.fake_pos_gagantes)
                             # si il peut le poser a un de ces endroits, et que prochain tour, il peut gagner sous deux formes
-                            if self.strat_adv(fake_pos_gagantes) != None and self.compteur >= 2:
+                            if self.compteur >= 3 != None and self.strat_adv(fake_pos_gagantes):
                                 pos = self.strat_adv(fake_pos_gagantes)
-                                self.tourJeu(str(pos))
-                        """
-                        else:
-                            self.IA2()
+                                technic = [0, 2, 6, 8]
+                                if pos in technic:
+                                    self.pos_gagnantes = [[1, 4, 7], [3, 4, 5]]
+                                    self.IA2()
+                                    self.pos_gagnantes = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7],[2, 5, 8], [0, 4, 8], [2, 4, 6]]
+                                    self.pos_gagnantes = self.update_pos_gagnantes(self.pos_gagnantes)
+                                else:
+                                    self.tourJeu(str(pos))
+                            else:
+                                print("Je lance une tentative de victoire !")
+                                if self.compteur <= 2:
+                                    technic = [0, 2, 6, 8]
+                                    for i in technic:
+                                        if i in self.grille.caseDispo:
+                                            pos = i
+                                    self.tourJeu(str(pos))
+                                else:
+                                    self.IA2()
             if self.grille.partieGagnee():
                 self.changePlayer()
                 print("La partie est terminée ! Le vainqueur est", self.joueurPlaying().nom)

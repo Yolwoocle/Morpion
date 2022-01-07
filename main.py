@@ -67,6 +67,7 @@ class Jeu:
         self.rang_joueur = 0
         self.compteur = 0
         self.pos_gagnantes = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]]
+        self.fake_pos_gagantes =  [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]]  # fake_pos_gagantes est une variable identique a pos_gagnantes, mais pour les X
     def update_pos_gagnantes(self, pos_gagnantes):
         numbers_X = []
         for k in range(9):
@@ -75,33 +76,24 @@ class Jeu:
         for tab in pos_gagnantes:
             for bad_number in numbers_X:
                 if bad_number in tab:
+                    print("On tente de remove tab de pos gagnantes, tab =", str(tab), "pos gagnantes =", str(pos_gagnantes))
                     pos_gagnantes.remove(tab)
         return pos_gagnantes
 
     def ifWinwin(self, grille, pos_gagnantes):
-        compteur = 0
         pos = None
-        for comb in pos_gagnantes: # Pour toutes les combinaisons
+        print("ifWinwin, pos gagnantes =", str(pos_gagnantes))
+        for comb in pos_gagnantes:  # Pour toutes les combinaisons
             compteur = 0
-            for co in comb: # On verifie si un ou plusieurs nombres
-                for case_libre in grille.caseDispo:
-                    if co == case_libre: # Correspondent avec les cases libre
-                        pos = co
-                        compteur += 1
-            if compteur >= 2: # S'il y a plus d'un nombre, on ne peut pas gagner en un coup, on ne return donc aucune position
-                pos = None
-        return pos
-    def ifWinwon(self, grille, fake_pos_gagnantes):
-        pos = None
-        for comb in fake_pos_gagnantes: # Pour toutes les combinaisons
             for i in comb:
-                compteur = 0
                 for case_libre in grille.caseDispo:
-                    if i == case_libre: # Correspondent avec les cases libre
+                    if i == case_libre:  # Correspondent avec les cases libre
                         pos = i
                         compteur += 1
-                if compteur >= 2: # S'il y a plus d'un nombre, on ne peut pas gagner en un coup, on ne return donc aucune position
-                    pos = None
+            if compteur > 1:  # S'il y a plus d'un nombre, on ne peut pas gagner en un coup, on ne return donc aucune position
+                pos = None
+            elif compteur == 1:
+                return pos
         return pos
 
     def strat_adv(self, fake_pos_gagnantes):
@@ -174,18 +166,18 @@ class Jeu:
                 return True
         return False
     def tourJeu(self, setPos):
-        self.grille.__str__()
         if setPos == None:
             pos = input(self.joueurPlaying().nom + ", Position: ")
         else:
             pos = setPos # Fonctionnement assure car setPos est issu d'un randint
-            print("L'IA joue : " + str(pos))
+            print("L'IA joue:", str(pos))
         while not(self.isEmpty(pos,self.grille)): # securite
             pos = input("Erreur, recommencez: ")
         self.grille.tableau[int(pos)].valeur = self.list_Joueur[self.rang_joueur].symbole # Assigne le symbole du joueur a la case du tableau au rang pos
         self.grille.caseDispo.remove(int(pos)) # Retire donc la case de la liste des cases vides
         self.compteur += 1
         self.changePlayer()
+        self.grille.__str__()
     def jeuEntier(self, niveau_IA):
         if niveau_IA == 0:
             while not(self.grille.partieGagnee()) and (len(self.grille.caseDispo) != 0): # Boucle du jeu
@@ -202,7 +194,7 @@ class Jeu:
                 if self.joueurPlaying() == self.list_Joueur[0]: # Si le joueur actuel est le player
                     self.tourJeu(None)
                 else:
-                    self.tourJeu(str(self.grille.caseDispo[random.randint(0, len(self.grille.caseDispo)-1)])) # prend un rang aleatoire correspondant a une case vide
+                    self.IA2()
             self.grille.__str__()
             if self.grille.partieGagnee():
                 self.changePlayer()
@@ -215,7 +207,15 @@ class Jeu:
                 if self.joueurPlaying() == self.list_Joueur[0]: # Si le joueur actuel est le player
                     self.tourJeu(None)
                 else:
-                    self.IA2()
+                    self.pos_gagnantes = self.update_pos_gagnantes(self.pos_gagnantes)
+                    if self.ifWinwin(self.grille, self.pos_gagnantes) != None:  # Gagne si c'est possible
+                        self.tourJeu(str(self.ifWinwin(self.grille, self.pos_gagnantes)))
+                    else:
+                        self.fake_pos_gagantes = self.update_fake_pos_gagnantes(self.grille, self.fake_pos_gagantes)
+                        if self.ifWinwin(self.grille, self.fake_pos_gagantes) != None:  # Empeche l'adversaire de gagner
+                            self.tourJeu(str(self.ifWinwin(self.grille, self.fake_pos_gagantes)))
+                        else:
+                            self.IA2()
             self.grille.__str__()
             if self.grille.partieGagnee():
                 self.changePlayer()
@@ -224,26 +224,27 @@ class Jeu:
                 print("Egalité!")
 
         elif niveau_IA == 3:
-            fake_pos_gagantes = self.pos_gagnantes  # fake_pos_gagantes est une variable identique a pos_gagnantes, mais pour les X
             while not(self.grille.partieGagnee()) and (len(self.grille.caseDispo) != 0): # Boucle du jeu
                 if self.joueurPlaying() == self.list_Joueur[0]: # Si le joueur actuel est le player
                     self.tourJeu(None)
                 else:
-                    self.pos_gagnantes = self.update_pos_gagnantes(self.pos_gagnantes)  # met donc a jour pos_gagnantes
-                    if self.ifWinwin(self.grille, self.pos_gagnantes) != None:
+                    self.pos_gagnantes = self.update_pos_gagnantes(self.pos_gagnantes)
+                    if self.ifWinwin(self.grille, self.pos_gagnantes) != None: # Gagne si c'est possible
                         self.tourJeu(str(self.ifWinwin(self.grille, self.pos_gagnantes)))
                     else:
-                        fake_pos_gagantes = self.update_fake_pos_gagnantes(self.grille, fake_pos_gagantes)
-                        if self.ifWinwon(self.grille, fake_pos_gagantes) != None:
-                            self.tourJeu(str(self.ifWinwon(self.grille, fake_pos_gagantes))) # Place notre symbole a l'endroit ou gagnerait l'ennemi si nous ne pouvions pas jouer.
+                        self.fake_pos_gagantes = self.update_fake_pos_gagnantes(self.grille, self.fake_pos_gagantes)
+                        if self.ifWinwin(self.grille, self.fake_pos_gagantes) != None: # Empeche l'adversaire de gagner
+                            self.tourJeu(str(self.ifWinwin(self.grille, self.fake_pos_gagantes)))
+                            """"
                         else:
                             fake_pos_gagantes = self.update_fake_pos_gagnantes(self.grille, fake_pos_gagantes)
                             # si il peut le poser a un de ces endroits, et que prochain tour, il peut gagner sous deux formes
                             if self.strat_adv(fake_pos_gagantes) != None and self.compteur >= 2:
                                 pos = self.strat_adv(fake_pos_gagantes)
                                 self.tourJeu(str(pos))
-                            else:
-                                self.IA2()
+                        """
+                        else:
+                            self.IA2()
             self.grille.__str__()
             if self.grille.partieGagnee():
                 self.changePlayer()
@@ -306,9 +307,9 @@ if multijoueur == "O":
     player2_name = input("Entrez le pseudo du joueur 2 de symbole O : ")
     niveau_IA = 0
 else:
-    print("--> IA de niveau 1 : Pose son symbole de façon aléatoire.")
-    print("--> IA de niveau 2 : Cherche à tout prix à faire une combinaison gagnante.")
-    print("--> IA de niveau 3 : IA impossible à vaincre...")
+    print("--> IA de niveau 1 : Pose son symbole de façon a gagner sans se soucier du jeu adverse.")
+    print("--> IA de niveau 2 : Bloque l'adversaire et tente de gagner.")
+    print("--> IA de niveau 3 : Anticipe la strategie adverse, la bloque, et si le gain est à portée, gagne.")
     niveau_IA = input("Choisissez le niveau de l'IA (1 / 2 / 3) : ")
     while not(niveau_IA == "1" or niveau_IA == "2" or niveau_IA == "3"): # Securite
         niveau_IA = input("Erreur, recommencez (1 / 2 / 3) : ")

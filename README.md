@@ -8,4 +8,4 @@ THe level one is basically an IA which play randomly,
 The second one just want to win the game...
 And the third is... the one you can't defeat.
 
-You'll all details in the main program, with comments in french/.
+You'll find all details in the main program, with comments in french/.
